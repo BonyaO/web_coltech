@@ -38,6 +38,17 @@ class ApplicationForm extends Component implements HasForms, HasInfolists
     public ?array $createData = [];
 
     public ?array $editData = [];
+    public function create(): void
+    {
+        Application::create([...$this->createForm->getState(), 'user_id' => Auth::id(), 'email' => Auth::user()->email]);
+
+        Notification::make('Hurray!')->body('Your application has been submitted successfully')->success()->send();
+
+        // Instead of redirect, emit an event to refresh the parent page
+        $this->dispatch('applicationCreated');
+        
+        redirect('/guest/submit-application?submitted=true');
+    }
 
     public function downloadForm()
     {
@@ -315,15 +326,6 @@ class ApplicationForm extends Component implements HasForms, HasInfolists
                     ->columns(3),
             ]),
         ]);
-    }
-
-    public function create(): void
-    {
-        Application::create([...$this->createForm->getState(), 'user_id' => Auth::id(), 'email' => Auth::user()->email]);
-
-        Notification::make('Hurray!')->body('Your application has been submitted successfully')->success()->send();
-
-        redirect('/guest/submit-application');
     }
 
     public function edit(): void

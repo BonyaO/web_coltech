@@ -17,12 +17,20 @@ class SubmitApplication extends Page
 
     protected static string $view = 'filament.guest.pages.guest.submit-application';
 
-    // Add reactive properties
-    protected $listeners = ['qualificationAdded' => 'refreshHeaderActions'];
+    // Update the listeners array to include the new event
+    protected $listeners = [
+        'qualificationAdded' => 'refreshHeaderActions',
+        'applicationCreated' => 'refreshHeaderActions'
+    ];
 
 
     public function mount()
     {
+        // Check if we just submitted an application
+        if (request()->query('submitted')) {
+            // Remove the query parameter from URL
+            redirect('/guest/submit-application');
+        }
         // Ensure we have fresh data on mount
         $this->refreshHeaderActions();
     }

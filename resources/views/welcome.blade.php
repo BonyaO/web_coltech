@@ -18,21 +18,34 @@
       <div class="max-w-2xl text-center mx-auto">
         <h1 class="block text-3xl font-black text-gray-800 sm:text-4xl md:text-5xl dark:text-white">The College of
           Technology <span class="text-lime-500 block">COLTECH</span></h1>
-        <p class="mt-3 text-gray-800 dark:text-neutral-400 leading-loose">Application into COLTECH is now open. Start your application
-          process today to gurantee your admission and kickstart your education.</p>
+        <p class="mt-3 text-gray-800 dark:text-neutral-400 leading-loose">Applications for the 2025/2026 academic year are now open. </p>
       </div>
-
+        <div class="mt-8 flex flex-col items-center gap-4">
+          <a href="/guest/login" class="inline-block px-6 py-3 bg-lime-500 text-white font-semibold rounded-lg shadow hover:bg-lime-600 transition">
+            Get started
+          </a>
+          <p class="text-gray-700 dark:text-neutral-300 text-sm">
+            Have questions? Email us at
+            <a href="mailto:coltech@uniba.cm" class="text-lime-600 underline hover:text-lime-500">coltech@uniba.cm</a>
+          </p>
+        </div>
       <div class="mt-10 relative max-w-5xl mx-auto">
         <div class="w-full object-cover h-96 sm:h-[480px] bg-[url('https://images.pexels.com/photos/4560083/pexels-photo-4560083.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')] bg-no-repeat bg-center bg-cover rounded-xl"></div>
-
         <div class="absolute inset-0 size-full">
-          <div class="flex flex-col justify-center items-center size-full">
+          <div class="flex flex-row justify-center items-center size-full space-x-4">
             <a class="animate-bounce py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-full border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
               href="{{ asset('images/userguide.pdf') }}" download="User guide">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
               </svg>
-              {{__("Download application guide")}}
+              {{ __("Download application guide") }}
+            </a>
+            <a class="animate-bounce py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-full border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
+              href="{{ asset('images/communique.pdf') }}" download="Communique">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
+              </svg>
+              {{ __("Download communique") }}
             </a>
           </div>
         </div>
