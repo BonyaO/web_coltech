@@ -28,7 +28,7 @@
 
                     @if (auth()->user()->level > 1)
                         <x-filament::tabs.item alpine-active="activeTab == 3" @click="activeTab = 3">
-                            Work Experience
+                            Internship / Work Experience
                         </x-filament::tabs.item>
                     @endif
 

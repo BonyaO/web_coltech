@@ -129,9 +129,48 @@ class ApplicationForm extends Component implements HasForms, HasInfolists
                             ->required(),
                         Forms\Components\TextInput::make('telephone')->tel()->required(),
                         Forms\Components\TextInput::make('country')->required()->live()->maxLength(255)->default('Cameroon'),
-                        Forms\Components\Select::make('region_id')->label('Region of origin')->native(false)->searchable()->live()->hidden(fn (Get $get) => $get('country') != 'Cameroon')->options(Region::all()->pluck('name')),
-                        Forms\Components\Select::make('division_id')->label('Division of origin')->native(false)->searchable()->live()->options(fn (Get $get) => Division::query('region_id', $get('region_id'))->pluck('name', 'id')),
-                        Forms\Components\Select::make('sub_division_id')->label('Sub-division of origin')->native(false)->searchable()->options(fn (Get $get) => SubDivision::query('diviion_id', $get('division_id'))->pluck('name', 'id')),
+                        Forms\Components\Select::make('region_id')
+                                ->label('Region of origin')
+                                ->native(false)
+                                ->searchable()
+                                ->options(Region::all()->pluck('name', 'id'))
+                                ->live() // This makes the field reactive
+                                ->afterStateUpdated(function (callable $set) {
+                                    // Clear dependent fields when region changes
+                                    $set('division_id', null);
+                                    $set('sub_division_id', null);
+                                }),
+
+                        Forms\Components\Select::make('division_id')
+                            ->label('Division of origin')
+                            ->native(false)
+                            ->searchable()
+                            ->options(function (callable $get) {
+                                $regionId = $get('region_id');
+                                if (!$regionId) {
+                                    return [];
+                                }
+                                return Division::where('region_id', $regionId)->pluck('name', 'id');
+                            })
+                            ->live() // This makes the field reactive
+                            ->afterStateUpdated(function (callable $set) {
+                                // Clear sub-division when division changes
+                                $set('sub_division_id', null);
+                            })
+                            ->disabled(fn (callable $get) => !$get('region_id')), // Disable if no region selected
+
+                        Forms\Components\Select::make('sub_division_id')
+                            ->label('Sub-division of origin')
+                            ->native(false)
+                            ->searchable()
+                            ->options(function (callable $get) {
+                                $divisionId = $get('division_id');
+                                if (!$divisionId) {
+                                    return [];
+                                }
+                                return SubDivision::where('division_id', $divisionId)->pluck('name', 'id');
+                            })
+                            ->disabled(fn (callable $get) => !$get('division_id')),
                         Forms\Components\TextInput::make('idc_number')
                             ->label('ID Card number')
                             ->required()
@@ -183,9 +222,53 @@ class ApplicationForm extends Component implements HasForms, HasInfolists
                 // TAB4: Programme information
                 Wizard\Step::make('Degree Programme')
                     ->schema([
-                        Forms\Components\Select::make('option1')->label('First choice')->required()->native(false)->searchable()->options(DepartmentOption::all()->pluck('name', 'id')),
-                        Forms\Components\Select::make('option2')->hint('Optional')->label('Second choice')->native(false)->searchable()->options(DepartmentOption::all()->pluck('name', 'id')),
-                        Forms\Components\Select::make('option3')->hint('Optional')->label('Third choice')->native(false)->searchable()->options(DepartmentOption::all()->pluck('name', 'id')),
+                        Forms\Components\Select::make('option1')
+                            ->label('First choice')
+                            ->required()
+                            ->native(false)
+                            ->searchable()
+                            ->options(function () {
+                                $userLevel = auth()->user()->level ?? 1;
+                                if ($userLevel == 1) {
+                                    return DepartmentOption::where('level', 'year_1')->pluck('name', 'id');
+                                } elseif ($userLevel == 2) {
+                                    return DepartmentOption::where('level', 'year_3')->pluck('name', 'id');
+                                } elseif ($userLevel == 3) {
+                                    return DepartmentOption::where('level', 'year_4')->pluck('name', 'id');
+                                }
+                            }),
+
+                        Forms\Components\Select::make('option2')
+                            ->hint('Optional')
+                            ->label('Second choice')
+                            ->native(false)
+                            ->searchable()
+                            ->options(function () {
+                                $userLevel = auth()->user()->level ?? 1;
+                                if ($userLevel == 1) {
+                                    return DepartmentOption::where('level', 'year_1')->pluck('name', 'id');
+                                } elseif ($userLevel == 2) {
+                                    return DepartmentOption::where('level', 'year_3')->pluck('name', 'id');
+                                } elseif ($userLevel == 3) {
+                                    return DepartmentOption::where('level', 'year_4')->pluck('name', 'id');
+                                }
+                            }),
+
+                        Forms\Components\Select::make('option3')
+                            ->hint('Optional')
+                            ->label('Third choice')
+                            ->native(false)
+                            ->searchable()
+                            ->options(function () {
+                                $userLevel = auth()->user()->level ?? 1;
+                                if ($userLevel == 1) {
+                                    return DepartmentOption::where('level', 'year_1')->pluck('name', 'id');
+                                } elseif ($userLevel == 2) {
+                                    return DepartmentOption::where('level', 'year_3')->pluck('name', 'id');
+                                } elseif ($userLevel == 3) {
+                                    return DepartmentOption::where('level', 'year_4')->pluck('name', 'id');
+                                }
+                            }),
                         Forms\Components\Select::make('exam_center_id')->label('Choose your examination center')->native(false)->searchable()->preload()->relationship('examCenter', 'name'),
                         Forms\Components\Radio::make('primary_language')
                             ->label('What is your primary language?')

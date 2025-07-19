@@ -80,19 +80,44 @@ class ApplicationResource extends Resource
                                 ->label('Region of origin')
                                 ->native(false)
                                 ->searchable()
-                                ->options(Region::all()->pluck('name')),
+                                ->options(Region::all()->pluck('name', 'id'))
+                                ->live() // This makes the field reactive
+                                ->afterStateUpdated(function (callable $set) {
+                                    // Clear dependent fields when region changes
+                                    $set('division_id', null);
+                                    $set('sub_division_id', null);
+                                }),
 
                             Forms\Components\Select::make('division_id')
                                 ->label('Division of origin')
                                 ->native(false)
                                 ->searchable()
-                                ->options(Division::all()->pluck('name')),
+                                ->options(function (callable $get) {
+                                    $regionId = $get('region_id');
+                                    if (!$regionId) {
+                                        return [];
+                                    }
+                                    return Division::where('region_id', $regionId)->pluck('name', 'id');
+                                })
+                                ->live() // This makes the field reactive
+                                ->afterStateUpdated(function (callable $set) {
+                                    // Clear sub-division when division changes
+                                    $set('sub_division_id', null);
+                                })
+                                ->disabled(fn (callable $get) => !$get('region_id')), // Disable if no region selected
 
                             Forms\Components\Select::make('sub_division_id')
                                 ->label('Sub-division of origin')
                                 ->native(false)
                                 ->searchable()
-                                ->options(SubDivision::all()->pluck('name')),
+                                ->options(function (callable $get) {
+                                    $divisionId = $get('division_id');
+                                    if (!$divisionId) {
+                                        return [];
+                                    }
+                                    return SubDivision::where('division_id', $divisionId)->pluck('name', 'id');
+                                })
+                                ->disabled(fn (callable $get) => !$get('division_id')), // Disable if no division selected
 
                             Forms\Components\TextInput::make('idc_number')
                                 ->label('ID Card number')
@@ -178,17 +203,47 @@ class ApplicationResource extends Resource
                             ->required()
                             ->native(false)
                             ->searchable()
-                            ->options(DepartmentOption::all()->pluck('name')),
+                            ->options(function () {
+                                $userLevel = auth()->user()->level ?? 1;
+                                if ($userLevel == 1) {
+                                    return DepartmentOption::where('level', 'year_1')->pluck('name', 'id');
+                                } elseif ($userLevel == 2) {
+                                    return DepartmentOption::where('level', 'year_3')->pluck('name', 'id');
+                                } elseif ($userLevel == 3) {
+                                    return DepartmentOption::where('level', 'year_4')->pluck('name', 'id');
+                                }
+                            }),
+
                         Forms\Components\Select::make('option2')
                             ->label('Second choice')
                             ->native(false)
                             ->searchable()
-                            ->options(DepartmentOption::all()->pluck('name')),
+                            ->options(function () {
+                                $userLevel = auth()->user()->level ?? 1;
+                                
+                                if ($userLevel == 1) {
+                                    return DepartmentOption::where('level', 'year_1')->pluck('name', 'id');
+                                } elseif ($userLevel == 2) {
+                                    return DepartmentOption::where('level', 'year_3')->pluck('name', 'id');
+                                } elseif ($userLevel == 3) {
+                                    return DepartmentOption::where('level', 'year_4')->pluck('name', 'id');
+                                }
+                            }),
+
                         Forms\Components\Select::make('option3')
                             ->label('Third choice')
                             ->native(false)
                             ->searchable()
-                            ->options(DepartmentOption::all()->pluck('name')),
+                            ->options(function () {
+                                $userLevel = auth()->user()->level ?? 1;
+                                if ($userLevel == 1) {
+                                    return DepartmentOption::where('level', 'year_1')->pluck('name', 'id');
+                                } elseif ($userLevel == 2) {
+                                    return DepartmentOption::where('level', 'year_3')->pluck('name', 'id');
+                                } elseif ($userLevel == 3) {
+                                    return DepartmentOption::where('level', 'year_4')->pluck('name', 'id');
+                                }
+                            }),
                         Forms\Components\Select::make('exam_center_id')
                             ->label('Choose your examination center')
                             ->native(false)
@@ -311,7 +366,6 @@ class ApplicationResource extends Resource
                             Infolists\Components\TextEntry::make('address'),
                             Infolists\Components\TextEntry::make('marital_status'),
                             Infolists\Components\TextEntry::make('is_civil_servant'),
-                            Infolists\Components\TextEntry::make('address'),
                         ])->columns(3),
                     Infolists\Components\Tabs\Tab::make('Other information')
                         ->schema([
@@ -444,22 +498,37 @@ class ApplicationResource extends Resource
                         ->exports([
                             ExcelExport::make()->withColumns([
                                 Column::make('name')->heading('Name'),
-                                Column::make('dob')->format('d/M/Y')->heading('Date of birth'),
+                                Column::make('dob')->heading('Date of birth'),
                                 Column::make('pob')->heading('Place of birth'),
                                 Column::make('gender')->heading('Gender'),
                                 Column::make('email')->heading('Institutional Email'),
                                 Column::make('address')->heading('Address'),
-                                Column::make('guardian_address')->heading('Guardian address'),
+                                Column::make('option1')->heading('First Choice'),
+                                Column::make('option2')->heading('Second Choice'),
+                                Column::make('option3')->heading('Third Choice'),
+                                Column::make('guardian_name')->heading('Guardian Name'),
+                                Column::make('guardian_address')->heading('Guardian Address'),
+                                Column::make('guardian_contact')->heading('Guardian Contact'),
+                                Column::make('father_name')->heading('Father Name'),
+                                Column::make('father_address')->heading('Father Address'),
+                                Column::make('father_contact')->heading('Father Contact'),
+                                Column::make('mother_name')->heading('Mother Name'),
+                                Column::make('mother_address')->heading('Mother Address'),
+                                Column::make('mother_contact')->heading('Mother Contact'),
                                 Column::make('telephone')->heading('Phone number'),
                                 Column::make('idc_number')->heading('NID/Passport'),
                                 Column::make('country')->heading('Nationality'),
                                 Column::make('region.name')->heading('Region/State'),
-                                Column::make('admitted_on')->format('d/M/Y'),
-                                Column::make('region.name')->heading('Region of origin'),
+                                Column::make('division.name')->heading('Division'),
+                                Column::make('sub_division.name')->heading('Sub-Division'),
+                                Column::make('primary_language')->heading('Primary Language'),
+                                Column::make('has_math')->heading('Has Maths'),
+                                Column::make('has_english')->heading('Has English'),
+                                Column::make('admitted_on')->format('d/m/Y')->heading('Admitted On'),
+                            ]),
                             ]),
                             // ->modifyQueryUsing(fn ($query) => $query->whereNotNull('admitted_on')),
                         ]),
-                ]),
             ]);
     }
 

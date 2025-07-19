@@ -81,6 +81,18 @@ class ListApplications extends ListRecords
             $this->addFileToZip($zip, $record, 'birthcert', $studentFolder, $getExtension);
             $this->addFileToZip($zip, $record, 'passport', $studentFolder, $getExtension);
             $this->addFileToZip($zip, $record, 'bankrecipt', $studentFolder, $getExtension);
+            foreach ($record->qualifications as $qualification) {
+                if ($qualification->certificate) {
+                    $qualFilePath = storage_path('app/public/' . $qualification->certificate);
+                    if (file_exists($qualFilePath)) {
+                        $qualFileName = $getExtension(
+                            str_replace('/', '', $qualification->qualificationType->name ?? 'qualification'),
+                            $qualification->certificate
+                        );
+                        $zip->addFile($qualFilePath, $studentFolder . $qualFileName);
+                    }
+                }
+            }
             
             // Add qualification certificates
             foreach ($record->qualifications as $qualification) {

@@ -20,6 +20,7 @@ class DepartmentOptionFactory extends Factory
         return [
             'department_id' => Department::factory(),
             'name' => fake()->word,
+            'level' => fake()->randomElement(array_keys(\App\Models\DepartmentOption::LEVELS)),
         ];
     }
 }
